@@ -25,6 +25,7 @@ android {
 
 dependencies {
     api project(':composed-delegate')
+    compileOnly "androidx.recyclerview:recyclerview:1.1.0"
 }
 
 afterEvaluate {
