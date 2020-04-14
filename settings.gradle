@@ -1,0 +1,6 @@
+rootProject.name='ComposedAdapter'
+include ':sample'
+include ':composed-list-adapter'
+include ':composed-delegate'
+include ':composed-paging-adapter'
+include ':composed-adapters'
