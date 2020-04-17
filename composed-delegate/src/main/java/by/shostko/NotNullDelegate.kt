@@ -5,16 +5,15 @@ package by.shostko
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 
 abstract class BaseNotNullDelegate<T : Any, B : ViewBinding>(
     diffItemCallback: DiffUtil.ItemCallback<T>,
-    clickListener: ClickListener<T>?,
+    private val clickListener: ((B, T, Int) -> Unit)?,
     private val itemIdProvider: ((T, Int) -> Long)?,
     onViewInflated: ((Int, B) -> Unit)?,
     private val binder: (B, T, Int, MutableList<Any>?) -> Unit
-) : CoreDelegate<T, B>(diffItemCallback, clickListener, onViewInflated) {
+) : CoreDelegate<T, B>(diffItemCallback, onViewInflated) {
 
     companion object {
         internal const val ERROR = "This adapter can't handle null item"
@@ -37,11 +36,10 @@ abstract class BaseNotNullDelegate<T : Any, B : ViewBinding>(
         return itemIdProvider?.invoke(item, position)
     }
 
-    private fun <T> ClickListener<T>.inject(holder: RecyclerView.ViewHolder, item: T?) {
-        if (item == null) {
-            holder.itemView.setOnClickListener(null)
-        } else {
-            holder.itemView.setOnClickListener { this(item) }
+    final override fun injectClickListener(holder: BindingViewHolder<B>, item: T?, position: Int) {
+        clickListener?.let {
+            requireNotNull(item) { ERROR }
+            holder.itemView.setOnClickListener { it(holder.binding, item, position) }
         }
     }
 }
@@ -49,7 +47,7 @@ abstract class BaseNotNullDelegate<T : Any, B : ViewBinding>(
 open class SingleTypeNotNullDelegate<T : Any, B : ViewBinding>(
     diffCallback: DiffUtil.ItemCallback<T>,
     private val inflater: (LayoutInflater, ViewGroup, Boolean) -> B,
-    clickListener: ClickListener<T>?,
+    clickListener: ((B, T, Int) -> Unit)?,
     itemIdProvider: ((T, Int) -> Long)?,
     onViewInflated: ((Int, B) -> Unit)?,
     binder: (B, T, Int, MutableList<Any>?) -> Unit
@@ -64,9 +62,9 @@ open class MultiTypeNotNullDelegate<T : Any>(
     diffCallback: DiffUtil.ItemCallback<T>,
     private val viewTypeProvider: (T, Int) -> Int,
     private val inflaterProvider: (Int) -> (LayoutInflater, ViewGroup, Boolean) -> ViewBinding,
-    clickListener: ClickListener<T>? = null,
-    itemIdProvider: ((T, Int) -> Long)? = null,
-    onViewInflated: ((Int, ViewBinding) -> Unit)? = null,
+    clickListener: ((ViewBinding, T, Int) -> Unit)?,
+    itemIdProvider: ((T, Int) -> Long)?,
+    onViewInflated: ((Int, ViewBinding) -> Unit)?,
     binder: (ViewBinding, T, Int, MutableList<Any>?) -> Unit
 ) : BaseNotNullDelegate<T, ViewBinding>(diffCallback, clickListener, itemIdProvider, onViewInflated, binder) {
 

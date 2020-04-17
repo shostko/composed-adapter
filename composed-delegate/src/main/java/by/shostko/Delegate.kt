@@ -16,15 +16,12 @@ interface AdapterDelegate<T, H : RecyclerView.ViewHolder> {
     fun getItemId(item: T?, position: Int): Long?
 }
 
-typealias ClickListener<T> = (T) -> Unit
-
 class BindingViewHolder<B : ViewBinding>(val binding: B) : RecyclerView.ViewHolder(binding.root) {
     constructor(parent: ViewGroup, inflater: (LayoutInflater, ViewGroup, Boolean) -> B) : this(inflater(LayoutInflater.from(parent.context), parent, false))
 }
 
 abstract class CoreDelegate<T, B : ViewBinding>(
     private val diffItemCallback: DiffUtil.ItemCallback<T>,
-    private val clickListener: ClickListener<T>?,
     private val onViewInflated: ((Int, B) -> Unit)?
 ) : AdapterDelegate<T, BindingViewHolder<B>> {
 
@@ -40,19 +37,13 @@ abstract class CoreDelegate<T, B : ViewBinding>(
 
     @CallSuper
     override fun onBindViewHolder(holder: BindingViewHolder<B>, item: T?, position: Int) {
-        clickListener?.inject(holder, item)
+        injectClickListener(holder, item, position)
     }
 
     @CallSuper
     override fun onBindViewHolder(holder: BindingViewHolder<B>, item: T?, position: Int, payloads: MutableList<Any>) {
-        clickListener?.inject(holder, item)
+        injectClickListener(holder, item, position)
     }
 
-    private fun <T> ClickListener<T>.inject(holder: RecyclerView.ViewHolder, item: T?) {
-        if (item == null) {
-            holder.itemView.setOnClickListener(null)
-        } else {
-            holder.itemView.setOnClickListener { this(item) }
-        }
-    }
+    abstract fun injectClickListener(holder: BindingViewHolder<B>, item: T?, position: Int)
 }

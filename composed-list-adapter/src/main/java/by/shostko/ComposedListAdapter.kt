@@ -22,7 +22,7 @@ open class ComposedListAdapter<T, H : RecyclerView.ViewHolder>(
         fun <T : Any, B : ViewBinding> nullableOf(
             diffCallback: DiffUtil.ItemCallback<T>,
             inflater: (LayoutInflater, ViewGroup, Boolean) -> B,
-            clickListener: ClickListener<T>? = null,
+            clickListener: ((B, T?, Int) -> Unit)? = null,
             itemIdProvider: ((T?, Int) -> Long)? = null,
             onViewInflated: ((Int, B) -> Unit)? = null,
             binder: (B, T?, Int, MutableList<Any>?) -> Unit
@@ -39,7 +39,7 @@ open class ComposedListAdapter<T, H : RecyclerView.ViewHolder>(
             diffCallback: DiffUtil.ItemCallback<T>,
             viewTypeProvider: (T?, Int) -> Int,
             inflaterProvider: (Int) -> (LayoutInflater, ViewGroup, Boolean) -> ViewBinding,
-            clickListener: ClickListener<T>? = null,
+            clickListener: ((ViewBinding, T?, Int) -> Unit)? = null,
             itemIdProvider: ((T?, Int) -> Long)? = null,
             onViewInflated: ((Int, ViewBinding) -> Unit)? = null,
             binder: (ViewBinding, T?, Int, MutableList<Any>?) -> Unit
@@ -56,7 +56,8 @@ open class ComposedListAdapter<T, H : RecyclerView.ViewHolder>(
         fun <T : Any, B : ViewBinding> of(
             diffCallback: DiffUtil.ItemCallback<T>,
             inflater: (LayoutInflater, ViewGroup, Boolean) -> B,
-            clickListener: ClickListener<T>? = null,
+            emptyClickListener: ((ViewBinding, Int) -> Unit)? = null,
+            clickListener: ((ViewBinding, T, Int) -> Unit)? = null,
             itemIdProvider: ((T?, Int) -> Long)? = null,
             onViewInflated: ((Int, B) -> Unit)? = null,
             emptyBinder: (B, Int, MutableList<Any>?) -> Unit,
@@ -64,7 +65,7 @@ open class ComposedListAdapter<T, H : RecyclerView.ViewHolder>(
         ): ListAdapter<T, out RecyclerView.ViewHolder> = ComposedListAdapter(SingleTypeNullableDelegate(
             diffCallback,
             inflater,
-            clickListener,
+            nullableClickListener(emptyClickListener, clickListener),
             itemIdProvider,
             onViewInflated,
             nullableBinder(emptyBinder, binder)
@@ -74,7 +75,8 @@ open class ComposedListAdapter<T, H : RecyclerView.ViewHolder>(
             diffCallback: DiffUtil.ItemCallback<T>,
             viewTypeProvider: (T?, Int) -> Int,
             inflaterProvider: (Int) -> (LayoutInflater, ViewGroup, Boolean) -> ViewBinding,
-            clickListener: ClickListener<T>? = null,
+            emptyClickListener: ((ViewBinding, Int) -> Unit)? = null,
+            clickListener: ((ViewBinding, T, Int) -> Unit)? = null,
             itemIdProvider: ((T?, Int) -> Long)? = null,
             onViewInflated: ((Int, ViewBinding) -> Unit)? = null,
             emptyBinder: (ViewBinding, Int, MutableList<Any>?) -> Unit,
@@ -83,7 +85,7 @@ open class ComposedListAdapter<T, H : RecyclerView.ViewHolder>(
             diffCallback,
             viewTypeProvider,
             inflaterProvider,
-            clickListener,
+            nullableClickListener(emptyClickListener, clickListener),
             itemIdProvider,
             onViewInflated,
             nullableBinder(emptyBinder, binder)
@@ -92,7 +94,7 @@ open class ComposedListAdapter<T, H : RecyclerView.ViewHolder>(
         fun <T : Any, B : ViewBinding> of(
             diffCallback: DiffUtil.ItemCallback<T>,
             inflater: (LayoutInflater, ViewGroup, Boolean) -> B,
-            clickListener: ClickListener<T>? = null,
+            clickListener: ((B, T, Int) -> Unit)? = null,
             itemIdProvider: ((T, Int) -> Long)? = null,
             onViewInflated: ((Int, B) -> Unit)? = null,
             binder: (B, T, Int, MutableList<Any>?) -> Unit
@@ -109,7 +111,7 @@ open class ComposedListAdapter<T, H : RecyclerView.ViewHolder>(
             diffCallback: DiffUtil.ItemCallback<T>,
             viewTypeProvider: (T, Int) -> Int,
             inflaterProvider: (Int) -> (LayoutInflater, ViewGroup, Boolean) -> ViewBinding,
-            clickListener: ClickListener<T>? = null,
+            clickListener: ((ViewBinding, T, Int) -> Unit)? = null,
             itemIdProvider: ((T, Int) -> Long)? = null,
             onViewInflated: ((Int, ViewBinding) -> Unit)? = null,
             binder: (ViewBinding, T, Int, MutableList<Any>?) -> Unit

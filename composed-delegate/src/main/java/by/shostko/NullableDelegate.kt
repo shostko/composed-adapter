@@ -5,16 +5,15 @@ package by.shostko
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 
 abstract class BaseNullableDelegate<T, B : ViewBinding>(
     diffItemCallback: DiffUtil.ItemCallback<T>,
-    clickListener: ClickListener<T>?,
+    private val clickListener: ((B, T?, Int) -> Unit)?,
     private val itemIdProvider: ((T?, Int) -> Long)?,
     onViewInflated: ((Int, B) -> Unit)?,
     private val binder: (B, T?, Int, MutableList<Any>?) -> Unit
-) : CoreDelegate<T, B>(diffItemCallback, clickListener, onViewInflated) {
+) : CoreDelegate<T, B>(diffItemCallback, onViewInflated) {
 
     final override fun onBindViewHolder(holder: BindingViewHolder<B>, item: T?, position: Int) {
         binder(holder.binding, item, position, null)
@@ -28,11 +27,9 @@ abstract class BaseNullableDelegate<T, B : ViewBinding>(
 
     final override fun getItemId(item: T?, position: Int): Long? = itemIdProvider?.invoke(item, position)
 
-    private fun <T> ClickListener<T>.inject(holder: RecyclerView.ViewHolder, item: T?) {
-        if (item == null) {
-            holder.itemView.setOnClickListener(null)
-        } else {
-            holder.itemView.setOnClickListener { this(item) }
+    final override fun injectClickListener(holder: BindingViewHolder<B>, item: T?, position: Int) {
+        clickListener?.let {
+            holder.itemView.setOnClickListener { it(holder.binding, item, position) }
         }
     }
 }
@@ -40,7 +37,7 @@ abstract class BaseNullableDelegate<T, B : ViewBinding>(
 open class SingleTypeNullableDelegate<T, B : ViewBinding>(
     diffCallback: DiffUtil.ItemCallback<T>,
     private val inflater: (LayoutInflater, ViewGroup, Boolean) -> B,
-    clickListener: ClickListener<T>?,
+    clickListener: ((B, T?, Int) -> Unit)?,
     itemIdProvider: ((T?, Int) -> Long)?,
     onViewInflated: ((Int, B) -> Unit)?,
     binder: (B, T?, Int, MutableList<Any>?) -> Unit
@@ -55,7 +52,7 @@ open class MultiTypeNullableDelegate<T>(
     diffCallback: DiffUtil.ItemCallback<T>,
     private val viewTypeProvider: (T?, Int) -> Int,
     private val inflaterProvider: (Int) -> (LayoutInflater, ViewGroup, Boolean) -> ViewBinding,
-    clickListener: ClickListener<T>? = null,
+    clickListener: ((ViewBinding, T?, Int) -> Unit)?,
     itemIdProvider: ((T?, Int) -> Long)? = null,
     onViewInflated: ((Int, ViewBinding) -> Unit)? = null,
     binder: (ViewBinding, T?, Int, MutableList<Any>?) -> Unit
@@ -71,8 +68,24 @@ fun <T : Any, B : ViewBinding> nullableBinder(
     binder: (B, T, Int, MutableList<Any>?) -> Unit
 ): (B, T?, Int, MutableList<Any>?) -> Unit = { binding, item, position, payloads ->
     if (item == null) {
-        emptyBinder.invoke(binding, position, payloads)
+        emptyBinder(binding, position, payloads)
     } else {
         binder(binding, item, position, payloads)
     }
 }
+
+fun <T : Any, B : ViewBinding> nullableClickListener(
+    emptyClickListener: ((B, Int) -> Unit)?,
+    clickListener: ((B, T, Int) -> Unit)?
+): ((B, T?, Int) -> Unit)? =
+    if (emptyClickListener == null && clickListener == null) {
+        null
+    } else {
+        { binding, item, position ->
+            if (item == null) {
+                emptyClickListener?.invoke(binding, position)
+            } else {
+                clickListener?.invoke(binding, item, position)
+            }
+        }
+    }
