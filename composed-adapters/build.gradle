@@ -26,6 +26,7 @@ android {
 dependencies {
     api project(':composed-paging-adapter')
     api project(':composed-list-adapter')
+    api project(':composed-single-adapter')
 }
 
 afterEvaluate {
