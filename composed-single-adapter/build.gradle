@@ -1,0 +1,33 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.novoda.bintray-release'
+
+publish {
+    userOrg = 'shostko'
+    repoName = 'android'
+    groupId = 'by.shostko'
+    artifactId = 'single-item-adapter'
+    publishVersion = rootProject.ext.versionName
+    desc = 'Easy creation of adapter with single item'
+    website = 'https://github.com/shostko/composed-adapter'
+}
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode rootProject.ext.versionCode
+        versionName rootProject.ext.versionName
+    }
+}
+
+dependencies {
+    api project(':composed-delegate')
+    compileOnly "androidx.recyclerview:recyclerview:1.1.0"
+}
+
+afterEvaluate {
+    generateReleaseBuildConfig.enabled = false
+}
