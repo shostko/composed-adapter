@@ -16,7 +16,7 @@ interface AdapterDelegate<T, H : RecyclerView.ViewHolder> {
     fun getItemId(item: T?, position: Int): Long?
 }
 
-class BindingViewHolder<B : ViewBinding>(val binding: B) : RecyclerView.ViewHolder(binding.root) {
+open class BindingViewHolder<B : ViewBinding>(val binding: B) : RecyclerView.ViewHolder(binding.root) {
     constructor(parent: ViewGroup, inflater: (LayoutInflater, ViewGroup, Boolean) -> B) : this(inflater(LayoutInflater.from(parent.context), parent, false))
 }
 
