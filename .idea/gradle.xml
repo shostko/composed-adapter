@@ -14,6 +14,7 @@
             <option value="$PROJECT_DIR$/composed-delegate" />
             <option value="$PROJECT_DIR$/composed-list-adapter" />
             <option value="$PROJECT_DIR$/composed-paging-adapter" />
+            <option value="$PROJECT_DIR$/composed-single-adapter" />
             <option value="$PROJECT_DIR$/sample" />
           </set>
         </option>
